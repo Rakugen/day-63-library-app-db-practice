@@ -3,7 +3,8 @@
 {% block title %}Edit Rating{% endblock %}
 
 {% block content %}
-<h1>Book Name: </h1>
-<h1>Current Rating: </h1>
+<h1>Book Name: {{book.title}} </h1>
+<h1>Current Rating: {{book.rating}}</h1>
+    {{ wtf.quick_form(form, novalidate=True) }}
 
 {% endblock %}

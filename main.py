@@ -29,8 +29,13 @@ class Book(db.Model):
 class LibraryForm(FlaskForm):
     title = StringField('Book Name:', validators=[DataRequired()])
     author = StringField('Book Author:', validators=[DataRequired()])
-    rating = FloatField('Raiting:', validators=[DataRequired(), NumberRange(min=0, max=10)])
+    rating = FloatField('Rating:', validators=[DataRequired(), NumberRange(min=0, max=10)])
     submit = SubmitField('Add Book')
+
+
+class EditForm(FlaskForm):
+    rating = FloatField('Rating:', validators=[DataRequired(), NumberRange(min=0, max=10)])
+    submit = SubmitField('Update')
 
 
 db.create_all()
@@ -46,11 +51,6 @@ def home():
 def add():
     form = LibraryForm()
     if form.validate_on_submit():
-        # new_book = {
-        #     "title": form.title.data,
-        #     "author": form.author.data,
-        #     "rating": int(form.rating.data)
-        # }
         new_book = Book(
             title=form.title.data,
             author=form.author.data,
@@ -63,10 +63,23 @@ def add():
     return render_template('add.html', form=form)
 
 
-@app.route("/edit/", methods=["GET", "POST"])
-def edit():
-    # print(book_id)
-    return render_template('edit.html')
+@app.route("/edit/<book_id>", methods=["GET", "POST"])
+def edit(book_id):
+    form = EditForm()
+    book = Book.query.get(book_id)
+    if form.validate_on_submit():
+        book.rating = form.rating.data
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('edit.html', book=book, form=form)
+
+
+@app.route("/delete/<book_id>", methods=["GET"])
+def delete(book_id):
+    book = Book.query.get(book_id)
+    db.session.delete(book)
+    db.session.commit()
+    return redirect(url_for('home'))
 
 
 if __name__ == "__main__":
